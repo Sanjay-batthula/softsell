@@ -25,21 +25,28 @@ export function ThemeProvider({
   storageKey = "theme",
   ...props
 }: ThemeProviderProps) {
+  // Initialize with defaultTheme only
   const [theme, setTheme] = useState<Theme>(defaultTheme)
   const [mounted, setMounted] = useState(false)
 
-  // Only access localStorage after mounting
+  // Move all localStorage operations to useEffect
   useEffect(() => {
     setMounted(true)
-    const storedTheme = typeof window !== 'undefined' 
-      ? (localStorage.getItem(storageKey) as Theme) 
-      : null
-    if (storedTheme) {
-      setTheme(storedTheme)
+    try {
+      const root = window.document.documentElement
+      const storedTheme = localStorage.getItem(storageKey) as Theme
+      if (storedTheme) {
+        setTheme(storedTheme)
+        root.classList.add(storedTheme)
+      } else {
+        root.classList.add(defaultTheme)
+      }
+    } catch (e) {
+      console.warn('Failed to access localStorage:', e)
     }
-  }, [storageKey])
+  }, [])
 
-  // Skip rendering any theme effects until mounted
+  // Theme effect
   useEffect(() => {
     if (!mounted) return
 
