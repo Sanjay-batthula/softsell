@@ -22,31 +22,17 @@ const ThemeProviderContext = createContext<{
 export function ThemeProvider({
   children,
   defaultTheme = "system",
-  storageKey = "theme",
   ...props
 }: ThemeProviderProps) {
-  // Initialize with defaultTheme only
   const [theme, setTheme] = useState<Theme>(defaultTheme)
   const [mounted, setMounted] = useState(false)
 
-  // Move all localStorage operations to useEffect
   useEffect(() => {
     setMounted(true)
-    try {
-      const root = window.document.documentElement
-      const storedTheme = localStorage.getItem(storageKey) as Theme
-      if (storedTheme) {
-        setTheme(storedTheme)
-        root.classList.add(storedTheme)
-      } else {
-        root.classList.add(defaultTheme)
-      }
-    } catch (e) {
-      console.warn('Failed to access localStorage:', e)
-    }
-  }, [])
+    const root = window.document.documentElement
+    root.classList.add(defaultTheme)
+  }, [defaultTheme])
 
-  // Theme effect
   useEffect(() => {
     if (!mounted) return
 
@@ -68,9 +54,6 @@ export function ThemeProvider({
   const value = {
     theme,
     setTheme: (newTheme: Theme) => {
-      if (typeof window !== 'undefined') {
-        localStorage.setItem(storageKey, newTheme)
-      }
       setTheme(newTheme)
     },
   }
